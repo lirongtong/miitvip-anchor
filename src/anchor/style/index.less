@@ -1,0 +1,28 @@
+@mi-prefix: mi-;
+@mi-font-size: 1rem;
+@mi-font-size-sm: 12px;
+@mi-font-size-normal: 14px;
+@mi-font-size-base: 16px;
+@mi-spacing: 8px;
+@mi-anchor: ~'@{mi-prefix}anchor';
+
+.flex(@align: center, @justify: center) {
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-align: @align;
+    align-items: @align;
+    justify-content: @justify;
+}
+
+.properties(@key, @value: @mi-spacing) {
+    @{key}: (@value / @mi-font-size-base) * @mi-font-size;
+}
+
+.@{mi-anchor} {
+    position: fixed;
+    max-height: calc(100vh - 360px);
+    overflow: auto;
+    background-color: transparent;
+    .properties(top, 200);
+    .properties(right, 20);
+}
