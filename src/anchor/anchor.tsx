@@ -42,6 +42,11 @@ const Anchor = defineComponent({
             const links = []
             for (let i = 0, l = list.length; i < l; i++) {
                 const link = list[i] as any
+                if (i === 0) links.push(
+                    <div class={`${this.prefixCls}-ink`}>
+                        <span class={`${this.prefixCls}-ink-ball`}></span>
+                    </div>
+                )
                 links.push(<AnchorLink id={link.id} title={link.title}></AnchorLink>)
             }
             return links
@@ -53,6 +58,9 @@ const Anchor = defineComponent({
         const style = {top: this.offsetTop ? `${tools.pxToRem(this.offsetTop)}rem` : null}
         return template ? (
             <div class={this.prefixCls} style={style}>
+                <div class={`${this.prefixCls}-title`}>
+                    
+                </div>
                 <div class={`${this.prefixCls}-box`}>
                     { template }
                 </div>

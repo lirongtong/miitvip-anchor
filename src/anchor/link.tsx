@@ -23,7 +23,7 @@ export default defineComponent({
                 const pos = document.documentElement.scrollTop || document.body.scrollTop
                 tools.scrollTop(document.body, pos, top)
             }
-            if (this.onClick) this.$emit('click')
+            if (this.onClick) this.$emit('click', e)
         }
     },
     render() {
