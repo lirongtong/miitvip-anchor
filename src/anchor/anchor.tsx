@@ -2,7 +2,7 @@ import { defineComponent, Transition, withDirectives, vShow, VNode } from 'vue'
 import { Tooltip } from 'makeit-tooltip'
 import { CloseCircleOutlined, PushpinOutlined } from '@ant-design/icons-vue'
 import AnchorLink from './link'
-import PropTypes from '../utils/props'
+import PropTypes, { getSlot } from '../utils/props'
 import tools from '../utils/tools'
 
 const Anchor = defineComponent({
@@ -17,7 +17,10 @@ const Anchor = defineComponent({
     data() {
         return {
             prefixCls: 'mi-anchor',
-            visible: true
+            visible: true,
+            list: [],
+            linkTemplate: null,
+            actives: []
         }
     },
     methods: {
@@ -33,6 +36,7 @@ const Anchor = defineComponent({
                         id,
                         title: item.innerText
                     })
+                    this.actives.push(false)
                 }
                 if (this.requireAttr) {
                     if (node[this.requireAttr]) {
@@ -42,13 +46,14 @@ const Anchor = defineComponent({
             }
             return data
         },
-        renderList(list: object[]) {
+        renderList() {
             const links = []
-            for (let i = 0, l = list.length; i < l; i++) {
-                const link = list[i] as any
+            for (let i = 0, l = this.list.length; i < l; i++) {
+                const link = this.list[i] as any
                 links.push(
                     <AnchorLink id={link.id}
                         title={link.title}
+                        active={this.actives[i]}
                         onClick={this.clickAnchorLink}>
                     </AnchorLink>
                 )
@@ -63,12 +68,19 @@ const Anchor = defineComponent({
             }, 300)
         },
         clickAnchorLink(e: any) {
+            for (let i = 0, l = this.list.length; i < l; i++) {
+                const item = this.list[i]
+                this.actives[i] = false
+                if (item.id === e.id) this.actives[i] = true
+            }
+            this.linkTemplate = []
             if (this.onClick) this.$emit('click', e)
         }
     },
     render() {
-        const list = this.parseList(document.querySelectorAll(this.selector))
-        const template = this.renderList(list)
+        this.list = this.parseList(document.querySelectorAll(this.selector))
+        this.linkTemplate = getSlot(this)
+        const template = this.linkTemplate.length <= 0 ? this.renderList() : this.linkTemplate
         const style = {top: this.offsetTop ? `${tools.pxToRem(this.offsetTop)}rem` : null}
         return template ? (
             <Transition name={this.prefixCls}>

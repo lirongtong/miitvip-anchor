@@ -13,7 +13,13 @@ export default defineComponent({
     },
     data() {
         return {
-            prefixCls: 'mi-anchor-link'
+            prefixCls: 'mi-anchor-link',
+            _active: this.$props.active
+        }
+    },
+    watch: {
+        active: function(state: boolean) {
+            this._active = state
         }
     },
     methods: {
@@ -24,16 +30,21 @@ export default defineComponent({
                 const pos = document.documentElement.scrollTop || document.body.scrollTop
                 tools.scrollTop(document.body, pos, top)
             }
-            if (this.onClick) this.$emit('click', e)
+            if (this.onClick) this.$emit('click', {
+                id: this.id,
+                title: this.title,
+                elem: e
+            })
         }
     },
     render() {
-        const icon = this.active ? <StarOutlined /> : <TagOutlined />
+        const icon = this._active ? <StarOutlined /> : <TagOutlined />
         return (
-            <div class={`${this.prefixCls}${this.active ? ` ${this.prefixCls}-active` : ''}`}>
+            <div class={`${this.prefixCls}${this._active ? ` ${this.prefixCls}-active` : ''}`}
+                onClick={this.handleClick}>
                 { icon }
                 <a class={`${this.prefixCls}-title`}
-                    title={this.title} onClick={this.handleClick}>
+                    title={this.title}>
                     { this.title }
                 </a>
             </div>

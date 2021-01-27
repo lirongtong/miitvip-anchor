@@ -112,6 +112,7 @@
         .properties(padding-top);
         .properties(padding-bottom);
         cursor: pointer;
+        transition: all .3s ease;
 
         a {
             display: inline-block;
@@ -127,6 +128,12 @@
         }
 
         &:hover {
+            a, .anticon {
+                color: var(--mi-theme-color, @mi-theme-color);
+            }
+        }
+
+        &&-active {
             a, .anticon {
                 color: var(--mi-theme-color, @mi-theme-color);
             }

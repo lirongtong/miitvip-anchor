@@ -1,4 +1,10 @@
+import { App, Plugin } from 'vue'
 import Anchor from './anchor'
-import { install } from '../utils/install'
 
-export default install(Anchor)
+Anchor.install = function(app: App) {
+    app.component(Anchor.name, Anchor)
+    app.component(Anchor.Link.name, Anchor.Link)
+    return app
+}
+
+export default Anchor as typeof Anchor & Plugin
