@@ -98,7 +98,8 @@ const Anchor = defineComponent({
         mouseEnterStick() {
             this.stick = false
             this.visible = true
-        }
+        },
+        windowScroll(e: any) {}
     },
     mounted() {
         this.$nextTick(() => {
@@ -112,6 +113,7 @@ const Anchor = defineComponent({
                     this.stickTop = Math.round((offsetTop + (height / 2) - 66) * 100) / 100
                 }
             })
+            tools.on(document.body, 'scroll', this.windowScroll)
         })
     },
     render() {

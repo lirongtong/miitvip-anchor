@@ -82,6 +82,53 @@ class MiTools {
         }
         return mobile
     }
+
+    /**
+     * Event binding.
+     * @param element
+     * @param event
+     * @param listener
+     * @param useCapture
+     */
+    on(
+        element: Window | HTMLElement,
+        event: keyof HTMLElementEventMap,
+        listener: (
+            this: HTMLDivElement,
+            evt: HTMLElementEventMap[keyof HTMLElementEventMap]
+        ) => any,
+        useCapture = false
+    ) {
+        if (!!document.addEventListener) {
+            if (element && event && listener) element.addEventListener(event, listener, useCapture)
+        } else {
+            if (element && event && listener) (element as any).attachEvent(`on${event}`, listener)
+        }
+    }
+
+    /**
+     * Event unbind.
+     * @param element
+     * @param event
+     * @param listener
+     * @param useCapture
+     */
+    off(
+        element: Window | HTMLElement,
+        event: keyof HTMLElementEventMap,
+        listener: (
+            this: HTMLDivElement,
+            evt: HTMLElementEventMap[keyof HTMLElementEventMap]
+        ) => any,
+        useCapture = false
+    ) {
+        if (!!document.addEventListener) {
+            if (element && event && listener)
+                element.removeEventListener(event, listener, useCapture)
+        } else {
+            if (element && event && listener) (element as any).detachEvent(`on${event}`, listener)
+        }
+    }
 }
 
 export default new MiTools
