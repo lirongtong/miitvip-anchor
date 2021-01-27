@@ -11,6 +11,7 @@ const Anchor = defineComponent({
         requireAttr: PropTypes.string,
         affix: PropTypes.bool,
         offsetTop: PropTypes.number.def(200),
+        scrollOffset: PropTypes.number.def(80),
         onClick: PropTypes.func
     },
     data() {
@@ -113,7 +114,7 @@ const Anchor = defineComponent({
                 const scrollTop = (
                     document.documentElement.scrollTop ||
                     document.body.scrollTop
-                ) + 80
+                ) + this.scrollOffset
                 for (let i = 0, l = this.list.length; i < l; i++) {
                     const item = this.list[i]
                     const next = this.list[i + 1]
