@@ -14,7 +14,7 @@ const config = {
         }
     },
     optimizeDeps: {
-        include: ['vue']
+        include: ['vue', '@ant-design/icons-vue', 'makeit-tooltip']
     },
     proxy: {
         '/v1': {

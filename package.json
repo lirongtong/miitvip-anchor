@@ -51,6 +51,7 @@
     },
     "dependencies": {
         "@ant-design/icons-vue": "^6.0.0",
+        "makeit-tooltip": "^1.1.1",
         "vue": "^3.0.5",
         "vue-types": "^3.0.1"
     },

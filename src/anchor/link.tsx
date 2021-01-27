@@ -1,4 +1,5 @@
 import { defineComponent } from 'vue'
+import { TagOutlined } from '@ant-design/icons-vue'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
@@ -29,6 +30,7 @@ export default defineComponent({
     render() {
         return (
             <div class={this.prefixCls}>
+                <TagOutlined />
                 <a class={`${this.prefixCls}-title${this.active ? ` ${this.prefixCls}-active` : ''}`}
                     title={this.title} onClick={this.handleClick}>
                     { this.title }
