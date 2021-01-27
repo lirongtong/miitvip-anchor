@@ -69,6 +69,19 @@ class MiTools {
         }
         scroll(from, to, step)
     }
+
+    isMobile(): boolean {
+        const agent = navigator.userAgent,
+            agents = ['Android', 'iPhone', 'SymbianOS', 'Windows Phone', 'iPad', 'iPod']
+        let mobile = false
+        for (let i = 0, len = agents.length; i < len; i++) {
+            if (agent.indexOf(agents[i]) > 0) {
+                mobile = true
+                break
+            }
+        }
+        return mobile
+    }
 }
 
 export default new MiTools

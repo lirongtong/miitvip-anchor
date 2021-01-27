@@ -1,6 +1,5 @@
 import { defineComponent, Transition, withDirectives, vShow, VNode } from 'vue'
-import { Tooltip } from 'makeit-tooltip'
-import { CloseCircleOutlined, PushpinOutlined } from '@ant-design/icons-vue'
+import { CloseCircleOutlined, PushpinOutlined, CaretLeftOutlined } from '@ant-design/icons-vue'
 import AnchorLink from './link'
 import PropTypes, { getSlot } from '../utils/props'
 import tools from '../utils/tools'
@@ -20,7 +19,9 @@ const Anchor = defineComponent({
             visible: true,
             list: [],
             linkTemplate: null,
-            actives: []
+            actives: [],
+            hover: this.$props.affix,
+            stick: false
         }
     },
     methods: {
@@ -62,9 +63,12 @@ const Anchor = defineComponent({
         },
         closeAnchor() {
             this.visible = false
+            this.stick = false
             setTimeout(() => {
                 const anchor = this.$refs[this.prefixCls]
                 if (anchor) anchor.remove()
+                const stick = this.$refs[`${this.prefixCls}-stick`]
+                if (stick) stick.remove()
             }, 300)
         },
         clickAnchorLink(e: any) {
@@ -75,6 +79,22 @@ const Anchor = defineComponent({
             }
             this.linkTemplate = []
             if (this.onClick) this.$emit('click', e)
+        },
+        clickAnchorAffix() {
+            this.hover = !this.hover
+            if (tools.isMobile() && !this.hover) this.mouseLeaveAnchor()
+        },
+        mouseLeaveAnchor() {
+            if (!this.hover) {
+                this.visible = false
+                setTimeout(() => {
+                    this.stick = true
+                }, 300)
+            }
+        },
+        mouseEnterStick() {
+            this.stick = false
+            this.visible = true
         }
     },
     render() {
@@ -82,28 +102,38 @@ const Anchor = defineComponent({
         this.linkTemplate = getSlot(this)
         const template = this.linkTemplate.length <= 0 ? this.renderList() : this.linkTemplate
         const style = {top: this.offsetTop ? `${tools.pxToRem(this.offsetTop)}rem` : null}
+        const rotate = this.hover ? -45 : 0
+        const title = this.hover ? '取消固定悬浮' : '开启固定悬浮'
         return template ? (
-            <Transition name={this.prefixCls}>
-                { withDirectives((
-                    <div class={this.prefixCls} style={style} ref={this.prefixCls}>
-                        <div class={`${this.prefixCls}-title`}>
-                            <div class={`${this.prefixCls}-icon`}>
-                                <Tooltip title="固定悬浮">
-                                    <PushpinOutlined rotate={-45} />
-                                </Tooltip>
+            <>
+                <Transition name={this.prefixCls}>
+                    { withDirectives((
+                        <div class={this.prefixCls} style={style} ref={this.prefixCls} onMouseleave={this.mouseLeaveAnchor}>
+                            <div class={`${this.prefixCls}-title`}>
+                                <div class={`${this.prefixCls}-icon`}>
+                                    <PushpinOutlined title={title} rotate={rotate} onClick={this.clickAnchorAffix} />
+                                </div>
+                                <div class={`${this.prefixCls}-icon`}>
+                                    <CloseCircleOutlined title="关闭锚点链接" onClick={this.closeAnchor} />
+                                </div>
                             </div>
-                            <div class={`${this.prefixCls}-icon`}>
-                                <Tooltip title="关闭锚链">
-                                    <CloseCircleOutlined onClick={this.closeAnchor} />
-                                </Tooltip>
+                            <div class={`${this.prefixCls}-box`}>
+                                { template }
                             </div>
                         </div>
-                        <div class={`${this.prefixCls}-box`}>
-                            { template }
+                    ) as VNode, [[vShow, this.visible]]) }
+                </Transition>
+                <Transition name={`${this.prefixCls}-stick`}>
+                    { withDirectives((
+                        <div class={`${this.prefixCls}-stick`}
+                            ref={`${this.prefixCls}-stick`}
+                            onMouseenter={this.mouseEnterStick}>
+                            <CaretLeftOutlined />
+                            <span class={`${this.prefixCls}-stick-text`}>锚点 Anchor</span>
                         </div>
-                    </div>
-                ) as VNode, [[vShow, this.visible]]) }
-            </Transition>
+                    ) as VNode, [[vShow, this.stick]]) }
+                </Transition>
+            </>
         ) : null
     }
 })
