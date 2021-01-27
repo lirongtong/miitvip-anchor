@@ -9,7 +9,7 @@ const Anchor = defineComponent({
     props: {
         selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
         requireAttr: PropTypes.string,
-        affix: PropTypes.bool.def(true),
+        affix: PropTypes.bool.def(false),
         offsetTop: PropTypes.number.def(200),
         onClick: PropTypes.func
     },
