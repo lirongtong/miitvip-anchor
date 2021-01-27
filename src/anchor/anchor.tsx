@@ -10,7 +10,7 @@ const Anchor = defineComponent({
         selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
         requireAttr: PropTypes.string,
         affix: PropTypes.bool.def(true),
-        offsetTop: PropTypes.number,
+        offsetTop: PropTypes.number.def(200),
         onClick: PropTypes.func
     },
     data() {
@@ -21,7 +21,8 @@ const Anchor = defineComponent({
             linkTemplate: null,
             actives: [],
             hover: this.$props.affix,
-            stick: false
+            stick: false,
+            stickTop: this.$props.offsetTop
         }
     },
     methods: {
@@ -48,18 +49,20 @@ const Anchor = defineComponent({
             return data
         },
         renderList() {
-            const links = []
-            for (let i = 0, l = this.list.length; i < l; i++) {
-                const link = this.list[i] as any
-                links.push(
-                    <AnchorLink id={link.id}
-                        title={link.title}
-                        active={this.actives[i]}
-                        onClick={this.clickAnchorLink}>
-                    </AnchorLink>
-                )
-            }
-            return links
+            if (this.list.length > 0) {
+                const links = []
+                for (let i = 0, l = this.list.length; i < l; i++) {
+                    const link = this.list[i] as any
+                    links.push(
+                        <AnchorLink id={link.id}
+                            title={link.title}
+                            active={this.actives[i]}
+                            onClick={this.clickAnchorLink}>
+                        </AnchorLink>
+                    )
+                }
+                return links
+            } else return []
         },
         closeAnchor() {
             this.visible = false
@@ -97,24 +100,44 @@ const Anchor = defineComponent({
             this.visible = true
         }
     },
+    mounted() {
+        this.$nextTick(() => {
+            this.list = this.parseList(document.querySelectorAll(this.selector))
+            this.linkTemplate = []
+            this.$nextTick(() => {
+                const anchor = this.$refs[this.prefixCls]
+                if (anchor) {
+                    const height = anchor.clientHeight
+                    const offsetTop = tools.getElementTop(anchor)
+                    this.stickTop = Math.round((offsetTop + (height / 2) - 66) * 100) / 100
+                }
+            })
+        })
+    },
     render() {
-        this.list = this.parseList(document.querySelectorAll(this.selector))
         this.linkTemplate = getSlot(this)
         const template = this.linkTemplate.length <= 0 ? this.renderList() : this.linkTemplate
-        const style = {top: this.offsetTop ? `${tools.pxToRem(this.offsetTop)}rem` : null}
+        const anchorStyle = {top: `${tools.pxToRem(this.offsetTop)}rem`}
         const rotate = this.hover ? -45 : 0
         const title = this.hover ? '取消固定悬浮' : '开启固定悬浮'
+        const stickStyle = {top: `${tools.pxToRem(this.stickTop)}rem`}
         return template ? (
             <>
-                <Transition name={this.prefixCls}>
+                <Transition name={this.prefixCls} key="anchor" appear>
                     { withDirectives((
-                        <div class={this.prefixCls} style={style} ref={this.prefixCls} onMouseleave={this.mouseLeaveAnchor}>
+                        <div class={this.prefixCls}
+                            style={anchorStyle}
+                            ref={this.prefixCls}
+                            onMouseleave={this.mouseLeaveAnchor}>
                             <div class={`${this.prefixCls}-title`}>
                                 <div class={`${this.prefixCls}-icon`}>
-                                    <PushpinOutlined title={title} rotate={rotate} onClick={this.clickAnchorAffix} />
+                                    <PushpinOutlined title={title}
+                                        rotate={rotate}
+                                        onClick={this.clickAnchorAffix} />
                                 </div>
                                 <div class={`${this.prefixCls}-icon`}>
-                                    <CloseCircleOutlined title="关闭锚点链接" onClick={this.closeAnchor} />
+                                    <CloseCircleOutlined title="关闭锚点链接"
+                                        onClick={this.closeAnchor} />
                                 </div>
                             </div>
                             <div class={`${this.prefixCls}-box`}>
@@ -123,9 +146,10 @@ const Anchor = defineComponent({
                         </div>
                     ) as VNode, [[vShow, this.visible]]) }
                 </Transition>
-                <Transition name={`${this.prefixCls}-stick`}>
+                <Transition name={`${this.prefixCls}-stick`} key="stick" appear>
                     { withDirectives((
                         <div class={`${this.prefixCls}-stick`}
+                            style={stickStyle}
                             ref={`${this.prefixCls}-stick`}
                             onMouseenter={this.mouseEnterStick}>
                             <CaretLeftOutlined />
