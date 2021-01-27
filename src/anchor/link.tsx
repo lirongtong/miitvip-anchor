@@ -1,5 +1,5 @@
 import { defineComponent } from 'vue'
-import { TagOutlined } from '@ant-design/icons-vue'
+import { TagOutlined, StarOutlined } from '@ant-design/icons-vue'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
 
@@ -28,10 +28,11 @@ export default defineComponent({
         }
     },
     render() {
+        const icon = this.active ? <StarOutlined /> : <TagOutlined />
         return (
-            <div class={this.prefixCls}>
-                <TagOutlined />
-                <a class={`${this.prefixCls}-title${this.active ? ` ${this.prefixCls}-active` : ''}`}
+            <div class={`${this.prefixCls}${this.active ? ` ${this.prefixCls}-active` : ''}`}>
+                { icon }
+                <a class={`${this.prefixCls}-title`}
                     title={this.title} onClick={this.handleClick}>
                     { this.title }
                 </a>

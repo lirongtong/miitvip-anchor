@@ -1,6 +1,6 @@
 import { defineComponent, Transition, withDirectives, vShow, VNode } from 'vue'
 import { Tooltip } from 'makeit-tooltip'
-import { CloseCircleOutlined, PushpinOutlined, TagOutlined } from '@ant-design/icons-vue'
+import { CloseCircleOutlined, PushpinOutlined } from '@ant-design/icons-vue'
 import AnchorLink from './link'
 import PropTypes from '../utils/props'
 import tools from '../utils/tools'
@@ -11,7 +11,8 @@ const Anchor = defineComponent({
         selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
         requireAttr: PropTypes.string,
         affix: PropTypes.bool.def(true),
-        offsetTop: PropTypes.number
+        offsetTop: PropTypes.number,
+        onClick: PropTypes.func
     },
     data() {
         return {
@@ -45,7 +46,12 @@ const Anchor = defineComponent({
             const links = []
             for (let i = 0, l = list.length; i < l; i++) {
                 const link = list[i] as any
-                links.push(<AnchorLink id={link.id} title={link.title}></AnchorLink>)
+                links.push(
+                    <AnchorLink id={link.id}
+                        title={link.title}
+                        onClick={this.clickAnchorLink}>
+                    </AnchorLink>
+                )
             }
             return links
         },
@@ -55,6 +61,9 @@ const Anchor = defineComponent({
                 const anchor = this.$refs[this.prefixCls]
                 if (anchor) anchor.remove()
             }, 300)
+        },
+        clickAnchorLink(e: any) {
+            if (this.onClick) this.$emit('click', e)
         }
     },
     render() {
