@@ -9,6 +9,7 @@ export default defineComponent({
         id: PropTypes.string.isRequired,
         title: PropTypes.string.isRequired,
         active: PropTypes.bool.def(false),
+        offset: PropTypes.number.def(80),
         onClick: PropTypes.func
     },
     data() {
@@ -26,7 +27,7 @@ export default defineComponent({
         handleClick(e: any) {
             const elem = document.getElementById(this.id)
             if (elem) {
-                const top = tools.getElementTop(elem)
+                const top = tools.getElementTop(elem) - this.offset
                 const pos = document.documentElement.scrollTop || document.body.scrollTop
                 tools.scrollTop(document.body, pos, top)
             }

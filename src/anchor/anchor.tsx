@@ -22,7 +22,9 @@ const Anchor = defineComponent({
             actives: [],
             hover: this.$props.affix,
             stick: false,
-            stickTop: this.$props.offsetTop
+            stickTop: this.$props.offsetTop,
+            manualActive: false,
+            manualTimer: null
         }
     },
     methods: {
@@ -34,8 +36,10 @@ const Anchor = defineComponent({
                     let id = tools.uid()
                     if (!item.id) item.setAttribute('id', id)
                     else id = item.id
+                    const offsetTop = tools.getElementTop(node) ?? 0
                     data.push({
                         id,
+                        offsetTop,
                         title: item.innerText
                     })
                     this.actives.push(false)
@@ -81,6 +85,11 @@ const Anchor = defineComponent({
                 if (item.id === e.id) this.actives[i] = true
             }
             this.linkTemplate = []
+            this.manualActive = true
+            if (this.manualTimer) clearTimeout(this.manualTimer)
+            this.manualTimer = setTimeout(() => {
+                this.manualActive = false
+            }, 500)
             if (this.onClick) this.$emit('click', e)
         },
         clickAnchorAffix() {
@@ -99,7 +108,30 @@ const Anchor = defineComponent({
             this.stick = false
             this.visible = true
         },
-        windowScroll(e: any) {}
+        documentBodyScroll() {
+            if (!this.manualActive) {
+                const scrollTop = (
+                    document.documentElement.scrollTop ||
+                    document.body.scrollTop
+                ) + 80
+                for (let i = 0, l = this.list.length; i < l; i++) {
+                    const item = this.list[i]
+                    const next = this.list[i + 1]
+                    this.actives[i] = false
+                    if (next) {
+                        if (
+                            item.offsetTop <= scrollTop &&
+                            next.offsetTop >= scrollTop
+                        ) this.actives[i] = true
+                    } else {
+                        if (item.offsetTop <= scrollTop) this.actives[i] = true
+                    }
+                }
+            }
+        }
+    },
+    beforeUnmount() {
+        tools.off(document.body, 'scroll', this.documentBodyScroll)
     },
     mounted() {
         this.$nextTick(() => {
@@ -113,7 +145,7 @@ const Anchor = defineComponent({
                     this.stickTop = Math.round((offsetTop + (height / 2) - 66) * 100) / 100
                 }
             })
-            tools.on(document.body, 'scroll', this.windowScroll)
+            tools.on(document.body, 'scroll', this.documentBodyScroll)
         })
     },
     render() {
