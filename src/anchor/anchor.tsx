@@ -9,7 +9,7 @@ const Anchor = defineComponent({
     props: {
         selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
         requireAttr: PropTypes.string,
-        affix: PropTypes.bool.def(false),
+        affix: PropTypes.bool,
         offsetTop: PropTypes.number.def(200),
         onClick: PropTypes.func
     },
@@ -20,7 +20,7 @@ const Anchor = defineComponent({
             list: [],
             linkTemplate: null,
             actives: [],
-            hover: this.$props.affix,
+            hover: this.$props.affix !== undefined ? this.$props.affix : false,
             stick: false,
             stickTop: this.$props.offsetTop,
             manualActive: false,
@@ -109,7 +109,7 @@ const Anchor = defineComponent({
             this.visible = true
         },
         documentBodyScroll() {
-            if (!this.manualActive) {
+            if (!this.manualActive && !this.stick) {
                 const scrollTop = (
                     document.documentElement.scrollTop ||
                     document.body.scrollTop
@@ -143,6 +143,12 @@ const Anchor = defineComponent({
                     const height = anchor.clientHeight
                     const offsetTop = tools.getElementTop(anchor)
                     this.stickTop = Math.round((offsetTop + (height / 2) - 66) * 100) / 100
+                }
+                if (!this.hover) {
+                    this.visible = false
+                    setTimeout(() => {
+                        this.stick = true
+                    }, 300)
                 }
             })
             tools.on(document.body, 'scroll', this.documentBodyScroll)
