@@ -7,6 +7,7 @@ import tools from '../utils/tools'
 const Anchor = defineComponent({
     name: 'MiAnchor',
     props: {
+        collectContainer: PropTypes.string,
         selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
         requireAttr: PropTypes.string,
         affix: PropTypes.bool,
@@ -136,7 +137,9 @@ const Anchor = defineComponent({
     },
     mounted() {
         this.$nextTick(() => {
-            this.list = this.parseList(document.querySelectorAll(this.selector))
+            let container: any = document
+            if (this.collectContainer) container = document.querySelector(this.collectContainer)
+            this.list = this.parseList(container.querySelectorAll(this.selector))
             this.linkTemplate = []
             this.$nextTick(() => {
                 const anchor = this.$refs[this.prefixCls]
