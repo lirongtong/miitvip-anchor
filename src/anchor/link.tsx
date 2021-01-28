@@ -1,7 +1,6 @@
 import { defineComponent } from 'vue'
 import { TagOutlined, StarOutlined } from '@ant-design/icons-vue'
 import PropTypes from '../utils/props'
-import tools from '../utils/tools'
 
 export default defineComponent({
     name: 'MiAnchorLink',
@@ -10,6 +9,7 @@ export default defineComponent({
         title: PropTypes.string.isRequired,
         active: PropTypes.bool.def(false),
         offset: PropTypes.number.def(80),
+        reserveOffset: PropTypes.number,
         onClick: PropTypes.func
     },
     data() {
@@ -27,9 +27,9 @@ export default defineComponent({
         handleClick(e: any) {
             const elem = document.getElementById(this.id)
             if (elem) {
-                const top = tools.getElementTop(elem) - this.offset
+                const top = this.$tools.getElementActualTopLeft(elem) - this.offset
                 const pos = document.documentElement.scrollTop || document.body.scrollTop
-                tools.scrollTop(document.body, pos, top)
+                this.$tools.scrollTop(document.body, pos, top - (this.reserveOffset ?? 0))
             }
             if (this.onClick) this.$emit('click', {
                 id: this.id,

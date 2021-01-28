@@ -13,6 +13,7 @@ const Anchor = defineComponent({
         affix: PropTypes.bool,
         offsetTop: PropTypes.number.def(200),
         scrollOffset: PropTypes.number.def(80),
+        reserveOffset: PropTypes.number,
         onClick: PropTypes.func
     },
     data() {
@@ -111,7 +112,7 @@ const Anchor = defineComponent({
             this.visible = true
         },
         documentBodyScroll() {
-            if (!this.manualActive && !this.stick) {
+            if (!this.manualActive) {
                 const scrollTop = (
                     document.documentElement.scrollTop ||
                     document.body.scrollTop
