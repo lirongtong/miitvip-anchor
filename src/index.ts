@@ -1,5 +1,4 @@
 import { App } from 'vue'
-import { version } from '../package.json'
 import { default as Anchor } from './anchor'
 
 const install = (app: App) => {
@@ -10,6 +9,5 @@ const install = (app: App) => {
 export { Anchor }
 
 export default {
-    version,
     install
 }

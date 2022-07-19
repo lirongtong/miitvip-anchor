@@ -1,211 +1,215 @@
-import { defineComponent, Transition, withDirectives, vShow, VNode } from 'vue'
-import { CloseCircleOutlined, PushpinOutlined, CaretLeftOutlined } from '@ant-design/icons-vue'
+import { defineComponent, reactive, Transition, ref, onMounted, onBeforeMount, nextTick } from 'vue'
+import { getPrefixCls, getPropSlot } from '../utils/props-tools'
+import { anchorProps } from './props'
+import { $tools } from '../utils/tools'
+import { PushpinOutlined, CloseCircleOutlined, CaretLeftOutlined } from '@ant-design/icons-vue'
 import AnchorLink from './link'
-import PropTypes, { getSlot } from '../utils/props'
-import tools from '../utils/tools'
+
+export type AnchorLinkItem = {
+    id: string
+    title: string
+    elem: Event
+}
 
 const Anchor = defineComponent({
     name: 'MiAnchor',
-    props: {
-        collectContainer: PropTypes.string,
-        selector: PropTypes.string.def('h1, h2, h3, h4, h5, h6'),
-        requireAttr: PropTypes.string,
-        affix: PropTypes.bool,
-        offsetTop: PropTypes.number.def(200),
-        scrollOffset: PropTypes.number.def(80),
-        reserveOffset: PropTypes.number,
-        onClick: PropTypes.func
-    },
-    data() {
-        return {
-            prefixCls: 'mi-anchor',
+    inheritAttrs: false,
+    props: anchorProps(),
+    emits: ['click'],
+    setup(props, { slots, emit }) {
+        const prefixCls = getPrefixCls('anchor', props.prefixCls)
+        const prefixAnchorKey = getPrefixCls(`anchor-${$tools.uid()}`, props.prefixCls)
+        const prefixStickKey = getPrefixCls(`anchor-stick-${$tools.uid()}`, props.prefixCls)
+        const anchorRef = ref(null)
+        const stickRef = ref(null)
+        const animation = getPrefixCls('anim-anchor')
+        const params = reactive({
             visible: true,
             list: [],
             linkTemplate: null,
             actives: [],
-            hover: this.$props.affix !== undefined ? this.$props.affix : false,
+            hover: props.affix ?? false,
             stick: false,
-            stickTop: this.$props.offsetTop,
+            stickTop: props.offsetTop,
             manualActive: false,
             manualTimer: null
-        }
-    },
-    methods: {
-        parseList(nodes: any) {
-            const data = []
-            for (let i = 0, l = nodes.length; i <l; i++) {
-                const node = nodes[i]
-                const setAttr = (item: any) => {
-                    let id = tools.uid()
+        }) as { [index: string]: any }
+
+        onBeforeMount(() => {
+            $tools.off(document.body, 'scroll', scrollBody)
+        })
+
+        onMounted(() => {
+            nextTick(() => {
+                let container: any = document
+                if (props.collectContainer)
+                    container = document.querySelector(props.collectContainer) as HTMLElement
+                params.list = parseAnchorData(container.querySelectorAll(props.selector))
+                params.linkTemplate = []
+                nextTick(() => {
+                    if (anchorRef.value) {
+                        const height = (anchorRef.value as HTMLElement).clientHeight
+                        const offset = $tools.getElementActualTopOrLeft(anchorRef.value)
+                        params.stickTop = Math.round((offset + height / 2 - 66) * 100) / 100
+                    }
+                    if (!params.hover) {
+                        params.visible = false
+                        params.stick = true
+                    }
+                })
+                $tools.on(document.body, 'scroll', scrollBody)
+            })
+        })
+
+        const parseAnchorData = (nodes: HTMLElement[]) => {
+            const data: any[] = []
+            nodes.forEach((node) => {
+                const setAttr = (item: HTMLElement) => {
+                    let id = $tools.uid()
                     if (!item.id) item.setAttribute('id', id)
                     else id = item.id
-                    const offsetTop = tools.getElementTop(node) ?? 0
+                    const offset = $tools.getElementActualTopOrLeft(node) ?? 0
                     data.push({
                         id,
-                        offsetTop,
+                        offset,
                         title: item.innerText
                     })
-                    this.actives.push(false)
+                    params.actives.push(false)
                 }
-                if (this.requireAttr) {
-                    if (node[this.requireAttr]) {
-                        setAttr(node)
-                    }
+                if (props.requireAttr) {
+                    if (node[props.requireAttr]) setAttr(node)
                 } else setAttr(node)
-            }
+            })
             return data
-        },
-        renderList() {
-            if (this.list.length > 0) {
-                const links = []
-                for (let i = 0, l = this.list.length; i < l; i++) {
-                    const link = this.list[i] as any
-                    links.push(
-                        <AnchorLink id={link.id}
-                            title={link.title}
-                            active={this.actives[i]}
-                            onClick={this.clickAnchorLink}>
-                        </AnchorLink>
-                    )
-                }
-                return links
-            } else return []
-        },
-        closeAnchor() {
-            this.visible = false
-            this.stick = false
-            setTimeout(() => {
-                const anchor = this.$refs[this.prefixCls]
-                if (anchor) anchor.remove()
-                const stick = this.$refs[`${this.prefixCls}-stick`]
-                if (stick) stick.remove()
-            }, 300)
-        },
-        clickAnchorLink(e: any) {
-            for (let i = 0, l = this.list.length; i < l; i++) {
-                const item = this.list[i]
-                this.actives[i] = false
-                if (item.id === e.id) this.actives[i] = true
-            }
-            this.linkTemplate = []
-            this.manualActive = true
-            if (this.manualTimer) clearTimeout(this.manualTimer)
-            this.manualTimer = setTimeout(() => {
-                this.manualActive = false
-            }, 500)
-            if (this.onClick) this.$emit('click', e)
-        },
-        clickAnchorAffix() {
-            this.hover = !this.hover
-            if (tools.isMobile() && !this.hover) this.mouseLeaveAnchor()
-        },
-        mouseLeaveAnchor() {
-            if (!this.hover) {
-                this.visible = false
-                setTimeout(() => {
-                    this.stick = true
-                }, 300)
-            }
-        },
-        mouseEnterStick() {
-            this.stick = false
-            this.visible = true
-        },
-        documentBodyScroll() {
-            if (!this.manualActive) {
-                const scrollTop = (
-                    document.documentElement.scrollTop ||
-                    document.body.scrollTop
-                ) + this.scrollOffset
-                for (let i = 0, l = this.list.length; i < l; i++) {
-                    const item = this.list[i]
-                    const next = this.list[i + 1]
-                    this.actives[i] = false
+        }
+
+        const scrollBody = () => {
+            if (!params.manualActive) {
+                const scrollTop =
+                    (document.documentElement.scrollTop || document.body.scrollTop) +
+                    props.scrollOffset
+                params.list.forEach((item: { [index: string]: any }, idx: number) => {
+                    const next = params.list[idx + 1]
+                    params.actives[idx] = false
                     if (next) {
-                        if (
-                            item.offsetTop <= scrollTop &&
-                            next.offsetTop >= scrollTop
-                        ) this.actives[i] = true
-                    } else {
-                        if (item.offsetTop <= scrollTop) this.actives[i] = true
-                    }
-                }
+                        if (item.offset <= scrollTop && next.offset >= scrollTop)
+                            params.actives[idx] = true
+                    } else if (item.offset <= scrollTop) params.actives[idx] = true
+                })
             }
         }
-    },
-    beforeUnmount() {
-        tools.off(document.body, 'scroll', this.documentBodyScroll)
-    },
-    mounted() {
-        this.$nextTick(() => {
-            let container: any = document
-            if (this.collectContainer) container = document.querySelector(this.collectContainer)
-            this.list = this.parseList(container.querySelectorAll(this.selector))
-            this.linkTemplate = []
-            this.$nextTick(() => {
-                const anchor = this.$refs[this.prefixCls]
-                if (anchor) {
-                    const height = anchor.clientHeight
-                    const offsetTop = tools.getElementTop(anchor)
-                    this.stickTop = Math.round((offsetTop + (height / 2) - 66) * 100) / 100
-                }
-                if (!this.hover) {
-                    this.visible = false
-                    setTimeout(() => {
-                        this.stick = true
-                    }, 300)
+
+        const mouseEnterStick = () => {
+            params.stick = false
+            params.visible = true
+        }
+
+        const mouseLeaveAnchor = () => {
+            if (!params.hover) {
+                params.visible = false
+                params.stick = true
+            }
+        }
+
+        const clickAnchorLink = (evt: AnchorLinkItem) => {
+            params?.list?.forEach((item: { [index: string]: any }, idx: number) => {
+                params.actives[idx] = false
+                if (item.id === evt.id) {
+                    params.actives[idx] = true
+                    return
                 }
             })
-            tools.on(document.body, 'scroll', this.documentBodyScroll)
-        })
-    },
-    render() {
-        this.linkTemplate = getSlot(this)
-        const template = this.linkTemplate.length <= 0 ? this.renderList() : this.linkTemplate
-        const anchorStyle = {top: `${tools.pxToRem(this.offsetTop)}rem`}
-        const rotate = this.hover ? -45 : 0
-        const title = this.hover ? '取消固定悬浮' : '开启固定悬浮'
-        const stickStyle = {top: `${tools.pxToRem(this.stickTop)}rem`}
-        return template ? (
-            <>
-                <Transition name={this.prefixCls} key="anchor" appear>
-                    { withDirectives((
-                        <div class={this.prefixCls}
-                            style={anchorStyle}
-                            ref={this.prefixCls}
-                            onMouseleave={this.mouseLeaveAnchor}>
-                            <div class={`${this.prefixCls}-title`}>
-                                <div class={`${this.prefixCls}-icon`}>
-                                    <PushpinOutlined title={title}
+            params.linkTemplate = []
+            params.manualActive = true
+            if (params.manualTimer) clearTimeout(params.manualTimer)
+            setTimeout(() => (params.manualActive = false), 400)
+            emit('click', evt)
+        }
+
+        const clickAnchorAffix = () => {
+            params.hover = !params.hover
+            if ($tools.isMobile() && !params.hover) mouseLeaveAnchor()
+        }
+
+        const clickAnchorClose = () => {
+            params.visible = false
+            params.stick = false
+            setTimeout(() => {
+                if (anchorRef.value) (anchorRef.value as HTMLElement).remove()
+                if (stickRef.value) (stickRef.value as HTMLElement).remove()
+            }, 400)
+        }
+
+        const renderList = () => {
+            const links: any[] = []
+            params?.list.forEach((link: HTMLElement, idx: number) => {
+                links.push(
+                    <AnchorLink
+                        id={link.id}
+                        title={link.title}
+                        active={params.actives[idx]}
+                        reserveOffset={props.reserveOffset}
+                        onClick={clickAnchorLink}
+                    />
+                )
+            })
+            return links
+        }
+
+        return () => {
+            params.linkTemplate = getPropSlot(slots, props)
+            const style = {
+                anchor: { top: $tools.convert2Rem(props.offsetTop) },
+                stick: { top: $tools.convert2Rem(params.stickTop) }
+            } as { [index: string]: any }
+            const rotate = params.hover ? -45 : 0
+            const title = params.hover ? '取消固定悬浮' : '开启固定悬浮'
+            return params.linkTemplate || params?.list?.length > 0 ? (
+                <>
+                    <Transition name={animation} appear={true}>
+                        <div
+                            class={prefixCls}
+                            style={style.anchor}
+                            ref={anchorRef}
+                            key={prefixAnchorKey}
+                            v-show={params.visible}
+                            onMouseleave={mouseLeaveAnchor}>
+                            <div class={`${prefixCls}-title`}>
+                                <div class={`${prefixCls}-icon`}>
+                                    <PushpinOutlined
+                                        title={title}
                                         rotate={rotate}
-                                        onClick={this.clickAnchorAffix} />
+                                        onClick={clickAnchorAffix}
+                                    />
                                 </div>
-                                <div class={`${this.prefixCls}-icon`}>
-                                    <CloseCircleOutlined title="关闭锚点链接"
-                                        onClick={this.closeAnchor} />
+                                <div class={`${prefixCls}-icon`}>
+                                    <CloseCircleOutlined
+                                        title="关闭锚点链接"
+                                        onClick={clickAnchorClose}
+                                    />
                                 </div>
                             </div>
-                            <div class={`${this.prefixCls}-box`}>
-                                { template }
+                            <div class={`${prefixCls}-box`}>
+                                {params.linkTemplate ?? renderList()}
                             </div>
                         </div>
-                    ) as VNode, [[vShow, this.visible]]) }
-                </Transition>
-                <Transition name={`${this.prefixCls}-stick`} key="stick" appear>
-                    { withDirectives((
-                        <div class={`${this.prefixCls}-stick`}
-                            style={stickStyle}
-                            ref={`${this.prefixCls}-stick`}
-                            onMouseenter={this.mouseEnterStick}>
+                    </Transition>
+                    <Transition name={animation} appear={true}>
+                        <div
+                            class={`${prefixCls}-stick`}
+                            style={style.stick}
+                            ref={stickRef}
+                            key={prefixStickKey}
+                            v-show={params.stick}
+                            onMouseenter={mouseEnterStick}>
                             <CaretLeftOutlined />
-                            <span class={`${this.prefixCls}-stick-text`}>锚点 Anchor</span>
+                            <span class={`${prefixCls}-stick-text`}>锚点 Anchor</span>
                         </div>
-                    ) as VNode, [[vShow, this.stick]]) }
-                </Transition>
-            </>
-        ) : null
+                    </Transition>
+                </>
+            ) : null
+        }
     }
 })
-
 Anchor.Link = AnchorLink
 export default Anchor
