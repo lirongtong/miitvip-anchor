@@ -24,8 +24,7 @@ const dirs = {
     src: '../src',
     dist: '../dist'
 }
-const distName = 'miitvip'
-const distCustomName = distName + '-custom'
+const distName = 'anchor'
 const lessFiles = []
 const customLessFiles = []
 const lessDirs = [
@@ -209,33 +208,7 @@ gulp.task('duplicate-concat-less-to-css', gulp.series(done => {
         .on('finish', () => done())
 }))
 
-gulp.task('duplicate-concat-less-to-custom-css', gulp.series('duplicate-concat-less-to-css', done => {
-    gulp.src(lessDirs)
-        .pipe(
-            through2.obj(function (file, _encoding, callback) {
-                duplicationMergeLess(file.path)
-                    .then(css => {
-                        file.contents = Buffer.from(css)
-                        this.push(file)
-                        callback()
-                    })
-                    .catch(e => {
-                        console.error(e)
-                    })
-            })
-        )
-        .pipe(sourcemaps.init())
-        .pipe(autoprefixer({
-            overrideBrowserslist: ['last 2 versions', 'ie > 8'],
-            cascade: true
-        }))
-        .pipe(concat(distCustomName + '.css'))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(dirs.dist))
-        .on('finish', () => done())
-}))
-
-gulp.task('minify-css', gulp.series('duplicate-concat-less-to-custom-css', done => {
+gulp.task('minify-css', gulp.series('duplicate-concat-less-to-css', done => {
     gulp.src([dirs.dist + '/' + distName + '.css'])
         .pipe(sourcemaps.init())
         .pipe(autoprefixer({
@@ -246,18 +219,6 @@ gulp.task('minify-css', gulp.series('duplicate-concat-less-to-custom-css', done 
             level: 2
         }))
         .pipe(concat(distName + '.min.css'))
-        .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(dirs.dist))
-    gulp.src([dirs.dist + '/' + distCustomName + '.css'])
-        .pipe(sourcemaps.init())
-        .pipe(autoprefixer({
-            overrideBrowserslist: ['last 2 versions', 'ie > 8']
-        }))
-        .pipe(CleanCss({
-            compatibility: 'ie8',
-            level: 2
-        }))
-        .pipe(concat(distCustomName + '.min.css'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(dirs.dist))
     done()
