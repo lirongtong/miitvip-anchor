@@ -1,6 +1,6 @@
 {
     "name": "makeit-anchor",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "author": {
         "url": "https://www.makeit.vip",
         "name": "lirongtong",
@@ -21,7 +21,7 @@
         "vue-component",
         "麦可易特网"
     ],
-    "description": "Makeit Anchor 锚点组件，基于 Vue3.0 + Vite + JSX 开发，自动收集页面内的 H 标题标签，使其形成锚点，悬浮展示并提供自动跳转功能。",
+    "description": "Makeit Anchor 锚点组件，基于 Vue3.x + Vite4.x + JSX 开发，自动收集页面内的 H 标题标签，使其形成锚点，悬浮展示并提供自动跳转功能。",
     "private": false,
     "license": "MIT",
     "repository": {
@@ -49,9 +49,9 @@
         "lint": "eslint -c ./.eslintrc --fix --ext .jsx,.js,.vue,.ts ./src"
     },
     "dependencies": {
-        "@ant-design/icons-vue": "^6.0.0",
-        "vue": "^3.2.37",
-        "vue-types": "^4.1.1"
+        "@ant-design/icons-vue": "^6.1.0",
+        "vue": "^3.2.47",
+        "vue-types": "^5.0.2"
     },
     "devDependencies": {
         "@babel/core": "^7.18.6",
@@ -67,14 +67,14 @@
         "@babel/plugin-transform-typescript": "^7.18.8",
         "@babel/preset-env": "^7.18.6",
         "@babel/preset-typescript": "^7.18.6",
-        "@intlify/vite-plugin-vue-i18n": "^3.4.0",
-        "@types/node": "^17.0.21",
+        "@intlify/unplugin-vue-i18n": "^0.8.1",
+        "@types/node": "^18.13.0",
         "@typescript-eslint/eslint-plugin": "^5.27.0",
         "@typescript-eslint/parser": "^5.27.0",
-        "@vitejs/plugin-vue": "^2.2.4",
+        "@vitejs/plugin-vue": "^4.0.0",
         "@vitejs/plugin-vue-jsx": "^1.3.8",
         "@vue/babel-plugin-jsx": "^1.1.1",
-        "@vue/compiler-sfc": "^3.2.37",
+        "@vue/compiler-sfc": "^3.2.47",
         "@vue/eslint-config-prettier": "^6.0.0",
         "@vue/eslint-config-typescript": "^10.0.0",
         "autoprefixer": "^10.4.7",
@@ -114,8 +114,8 @@
         "typescript": "^4.7.2",
         "unplugin-vue-components": "^0.19.6",
         "url-loader": "^4.1.1",
-        "vite": "^2.9.9",
-        "vite-plugin-eslint": "^1.5.2",
+        "vite": "^4.1.1",
+        "vite-plugin-eslint": "^1.8.1",
         "vue-eslint-parser": "^8.3.0",
         "vue-loader": "^17.0.0",
         "vue-style-loader": "^4.1.3",

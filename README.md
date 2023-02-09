@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://admin.makeit.vip/">
-        <img width="200" src="https://file.makeit.vip/MIIT/M00/00/00/ajRkHV_pUyOALE2LAAAtlj6Tt_s370.png">
+        <img width="200" src="https://file.makeit.vip/MIITVIP/M00/00/00/K4vDRGPcbmmAG8_sAAAtlj6Tt_s562.png">
     </a>
 </p>
 
@@ -12,19 +12,19 @@
 
 <div align="center">
 
-基于 Vue3.x + Vite2.x 开发的自动收集 `h` 标签，进而形成锚点，悬浮展示的组件
+基于 Vue3.x + Vite4.x 开发的自动收集 `h` 标签，进而形成锚点，悬浮展示，点击跳转的组件
 
 [![npm package](https://img.shields.io/npm/v/makeit-anchor.svg?style=flat-square)](https://www.npmjs.org/package/makeit-anchor)
 [![npm_downloads](http://img.shields.io/npm/dm/makeit-anchor.svg?style=flat-square)](http://www.npmtrends.com/makeit-anchor)
 ![MIT](https://img.shields.io/badge/license-MIT-ff69b4.svg)
 ![webpack](https://img.shields.io/badge/webpack-5.17.0-orange.svg)
-![vue](https://img.shields.io/badge/vue-3.2.37-green.svg)
-![vite](https://img.shields.io/badge/vite-2.9.9-yellow.svg)
+![vue](https://img.shields.io/badge/vue-3.2.47-green.svg)
+![vite](https://img.shields.io/badge/vite-4.1.1-yellow.svg)
 </div>
 
 ## 关于
 
-> Makeit Anchor 锚点组件，基于 Vue3.x + Vite2.x 开发，自动收集页面内的 `h` 标签 ( 同时支持自定义收集区域及指定标签 )，使其形成锚点，悬浮展示并提供自动跳转功能。
+> Makeit Anchor 锚点组件，基于 Vue3.x + Vite2.x 开发，自动收集页面内的 `h` 标签 ( 同时支持自定义收集区域及指定标签 )，使其形成锚点，悬浮展示并提供点击自动跳转功能。
 
 :white_check_mark: 默认收集页面内的 `h` 标签
 
